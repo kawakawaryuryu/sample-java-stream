@@ -1,9 +1,13 @@
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -19,12 +23,15 @@ public class Main {
 
     // FileInputStream
     main.readByFileInputStream();
+    main.readByFileInputStreamToWriteByFileOutputStream();
+    main.readByBufferedFileInputStreamToWriteByBufferedFileOutputStream();
 
     // ZipInputStream
     main.readByZipInputStream();
 
     // InputStreamReader
     main.readByInputStreamReader();
+    main.readByInputStreamReaderToWriteByOutputStreamWriter();
 
     // FileReader
     main.readByFileReader();
@@ -47,11 +54,39 @@ public class Main {
   }
 
   private void readByFileInputStream() {
-    byte[] readData = new byte[32];
+    byte[] readData = new byte[1024];
     try (FileInputStream fis = new FileInputStream("./src/japanese.txt")) {
       int readBytes = fis.read(readData, 0, 5); // 第三引数で指定した長さ（バイト数）分読み込む
       System.out.println(readBytes); // 5
       System.out.println(new String(readData)); // 私�  ←日本語を5バイトまで読み込んだことで途中までしか読めなかったので最後の文字は文字化けしている
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void readByFileInputStreamToWriteByFileOutputStream() {
+    byte[] readData = new byte[1024];
+    try (
+        FileInputStream fis = new FileInputStream("./src/coin.png");
+        FileOutputStream fos = new FileOutputStream("./out/written.png")) {
+      int readBytes;
+      while ((readBytes = fis.read(readData)) != -1) {
+        fos.write(readData, 0, readBytes);
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void readByBufferedFileInputStreamToWriteByBufferedFileOutputStream() {
+    byte[] readData = new byte[1024];
+    try (
+        BufferedInputStream bis = new BufferedInputStream(new FileInputStream("./src/coin.png"));
+        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream("./out/written2.png"))) {
+      int readBytes;
+      while ((readBytes = bis.read(readData)) != -1) {
+        bos.write(readData, 0, readBytes);
+      }
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -126,6 +161,21 @@ public class Main {
       int readChars = isr.read(readData, 0, 5); // 第三引数で指定した長さ（文字数）分読み込む
       System.out.println(readChars); // 5
       System.out.println(new String(readData)); // 私は日本人
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void readByInputStreamReaderToWriteByOutputStreamWriter() {
+    char[] readData = new char[32];
+    try (
+        InputStreamReader isr = new InputStreamReader(new FileInputStream("./src/japanese.txt"));
+        OutputStreamWriter osr = new OutputStreamWriter(new FileOutputStream("./out/japanese.txt"))
+    ) {
+      int readChars;
+      while ((readChars = isr.read(readData)) != -1) {
+        osr.write(readData, 0, readChars);
+      }
     } catch (IOException e) {
       e.printStackTrace();
     }
